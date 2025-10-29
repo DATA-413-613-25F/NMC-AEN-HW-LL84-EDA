@@ -107,7 +107,10 @@ Collaboration and Branching:
 We have an iMessage group where we sync our daily work in real time. Every weekend, we'll have a 10-minute summary session. On the branch, each person has a long-term section. After writing a short paragraph, we'll merge it once. The main branch only receives stable results. Before merging, we'll run a self-test ourselves and then post it in the group. We don't follow complicated procedures.
 
 Schedule:
-
+Part one for 1 week
+Part two for 2 weeks
+Part three for 2 weeks
+Power point for 1 week
 
 
 Plan.7 Readability. 
