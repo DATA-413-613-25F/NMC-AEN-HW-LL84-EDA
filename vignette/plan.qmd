@@ -1,0 +1,114 @@
+---
+title: "Project Plan — NYC LL84 EDA"
+author: "Nabiha M Chowdhury; Anna E Nagurney; Honglin Wang"
+date: "2025-10-27"
+format: html
+toc: true
+number-sections: true
+---
+
+
+Plan.1 Admin
+Project Title: 
+NYC LL84 Building Energy & Water — Interactive EDA App (2022–Present)
+
+Group Members:
+Nabiha M Chowdhury
+Anna E Nagurney
+Honglin Wang
+
+Plan.2 Topic and Data
+Backgound:
+We believe that the LL84 regulations in New York require buildings of a certain size or larger to report their energy consumption and water usage data to the EPA's Portfolio Manager and make the data publicly available. This way, everyone can compare similar buildings and the government and property owners can more easily identify "which types of buildings consume more energy and what measures should be taken to save energy". What our app aims to do is to enable users to see in three steps: where I am (distribution/quantile), where I fall short (comparison/relation), and who should be the first to make changes (top/bottom list).
+
+Data Source:
+https://data.cityofnewyork.us/Environment/NYC-Building-Energy-and-Water-Data-Disclosure-for-/5zyy-y8am/about_data
+Dataset: Publicly disclosed building energy and water usage data for New York City (in accordance with Local Law 84) (from 2022 to present), New York City Open Data.
+API/Export: On the dataset page under the "Export/API" tab, you can obtain the SODA endpoint and query methods (here we are exporting in CSV format).
+Compliance Statement: The data is disclosed by the New York City Department of Buildings in accordance with LL84 regulations, and its source is official and can be verified repeatedly.
+Time Coverage: 2022 – present.
+Scale: Approximately 60,000+ rows × 200+ columns, with sufficient variables. 
+As of: October 27, 2025.
+
+Reference:
+“The NYC Benchmarking Law, Local Law 84 of 2009 as amended by Local Law 133 of 2016, requires owners of buildings that meet the criteria outlined in the law to annually measure their energy and water consumption through a process called benchmarking.” 
+“Local Law 84 of 2009 (LL84) requires annual energy and water benchmarking data to be submitted by owners of buildings with more than 50,000 square feet. This data is collected via the Environmental Protection Agency's (EPA) Portfolio Manager website.”
+
+Based on the above text, we believe that LL84 requires large-scale buildings in New York to report their energy consumption and water usage annually in a standardized manner. This should be done using the official EPA Portfolio Manager tool and then made public. This provides us with a comparable and reusable source of primary data. Therefore, in the app, we will set the reporting year/building type/administrative area as default filters, and consider EUI (energy use intensity per unit area) as the main indicator to help users quickly understand "where I am, where I fall short, and who to address first".
+
+“The NYC OpenData portal supports a generic API that permits access to all published data sets in a similar manner. The API is based upon the Socrata Open Data API (SODA).”
+We found that NYC Open Data comes with a standardized SODA interface. Any dataset can be obtained from the "Export → API" section, and the API Endpoint and fields can be retrieved. Thus, the script can accurately extract the data.
+
+
+Plan.3 Use Case
+Use Case & Actor Description:
+For us, this App is designed for urban energy analysts and property facility managers. They can view the data but do not want to write code. A typical scenario is: someone wants to know "How much does this building/this type of building cost in New York? How much does it differ from similar buildings? Has it improved this year?" So we have designed the interface in a process where you first select the conditions and then view the results. There are fewer parameters and less jargon. It provides step-by-step energy-saving suggestions and lists that are understandable and actionable.
+
+Actor Questions of Interest:
+What are the median EUI values for various types of buildings (Property Type) and each borough in the selected year? Which types/areas have EUI values significantly higher than the 75th percentile of the city's similar values? 
+(By calculating the median and quartiles separately, box plots/distribution graphs can quickly show which types/areas are "above the upper quartile".) 
+
+Under the current filtering conditions (year, type, district, area range), sort by unit area electricity consumption (kWh/ft²) or unit area water consumption (kgal/ft²) from highest to lowest. Which specific buildings are included in the top 10% or top N?
+(Calculate the unitized indicators → Sort → Mark the threshold → Export CSV list.) 
+
+Is there a clear monotonic trend between EUI, floor area (ft²) and building age? If viewed by property type, does the trend still exist or become more pronounced?
+(Scatter plot + linear smoothing; Spearman correlation; Comparison by type.) 
+
+Has the median/frequency of EUI for the same type of buildings (the same Property Type) decreased in 2025 compared to 2024? Which types or Boroughs have achieved greater energy savings overall this year?
+(Select two years → Group by the same category → Compare the median/frequency → Use a bar chart to show the changes and mark the decrease/stability/increase.)
+
+Anticipate Workflow of the Actor:
+We consider that it would be best for users to follow a convenient process: first, select the year at the top of the page, say 2025, then check the filtering conditions: the common ones are Property Type, Borough, Area Range, and Building Age. At the same time, turn on the data quality switches such as "Only >0" and "Outliers (1% above and below)" as needed. Then, look at the overview area of the distribution/bubble chart first. We will present the EUI for each type or each area as the median + quantile, allowing users to immediately see "who is high and who is low, who is an outlier". After looking at the overview, move to the relationship area and use scatter plots + smooth lines to view the relationship between EUI and area/building age. If you are worried that it will be too chaotic when mixed together, click "By Type Layering". Within the same category, it will be clearer to observe the trend. When you feel that the range selection is about right, click "Generate Top List": The system will automatically sort by unit area electricity consumption (kWh/ft²) or unit area water consumption (kgal/ft²), and provide the top 10%/Top N list of buildings. Finally, we will automatically generate a one-sentence summary for you, telling you: In this filter, which category/which area is higher, has there been any improvement compared to last year, and which buildings should be prioritized.
+
+Plan.4 Ethical Review
+We have selected the LL84 data published by NYC Open Data, which is sourced from the official and can be replicated. In the README, we will indicate the source and as-of date, and provide API examples and steps for reproducing the experiment. The data is stored in the repository under the folders 'data_raw' and 'data', avoiding uploading unnecessary large raw files. When necessary, Git LFS is used. During the cleaning stage, we do not directly treat 0 values as good results. Instead, we provide interactive switches such as 'only look at >0 or 'remove extreme values (within 1%), and explain the handling methods for missing or extreme values in the figure notes. In the analysis and visualization stage, we only perform descriptive EDA, unify axis units and proportions, display sample size and filtering conditions, and avoid interpreting correlations as causation. During the publishing and sharing stage, the default display is aggregated/grouped views, and no value judgment is made on individual properties. If users export the Top list, the interface and exported files will also add usage and risk warnings.
+
+Plan.5 App Concept
+General Layout:
+We have decided to adopt a layout of a left-side filter bar and a right-side result area for the software, and provide three tabs: Home (data source, units), EDA (core analysis), and About (references, license, version information). Within EDA, there are two sub-areas: Overview (distribution or box plot and a one-sentence summary) and Compare.
+
+Data Selection & manipulation:
+On the left side, the following are provided: Year (we have set it to 2025), Property Type (multiple selections), Borough (multiple selections), Floor Area bins, Building Age range. The quality options include "Only > 0" and "extremes (±1%)". Changes in filtering will only refresh the affected charts. 
+
+Numerical/Graphical analysis:
+Distribution/Comparison: EUI histogram/density + box plot/violin plot (by Type/Borough), where we will include a legend indicating the units and sample size. 
+Relationships: The scatter plot shows EUI vs. area/building age, supports the option to categorize by Type, and the related heatmap displays the correlations between EUI, unit electricity/water consumption, area, and building age. 
+Watchlist: Generate a Top/Bottom list sorted by unit area electricity consumption (kWh/ft²) / water consumption (kgal/ft²). 
+
+Statistical models and tests:
+Our group members are all 413, excluding interactive modeling. We will compare the median/interquartile changes in EUI between 2025 and 2024 (using bar/pie charts), and provide the differences and directions.
+
+
+Plan.6 Collaboration
+Group Members:
+Nabiha M Chowdhury
+Anna E Nagurney
+Honglin Wang
+
+Part one(Nabiha):
+Download the 2025 data from NYC Open Data to the repository (keep a sample CSV).
+Clean the data and retain only the necessary columns (year, type, district, area, construction year, EUI, electricity/water, etc.).
+only consider values greater than 0, remove extreme values. 
+
+Part Two(Honglin):
+Create a page with filtering on the left and results on the right (select year / type / district / area / building age).
+Box plot / distribution chart: See which category / which district has a higher EUI;
+Scatter plot + smoothing: See the relationship between EUI and area, building age;
+Top list table: Rank by unit area electricity consumption / water consumption.
+Add a simple comparison chart (bar chart) between this year and last year. 
+
+Part Three(Anna):
+Create a README (data source and date, how to run, field descriptions).
+Place the following in Plan/Progress/Vignette: use cases, several diagrams, a brief summary.
+Write an ethical paragraph (to public data, only descriptive analysis).
+prepare for the power point(or all of us).
+
+Collaboration and Branching:
+We have an iMessage group where we sync our daily work in real time. Every weekend, we'll have a 10-minute summary session. On the branch, each person has a long-term section. After writing a short paragraph, we'll merge it once. The main branch only receives stable results. Before merging, we'll run a self-test ourselves and then post it in the group. We don't follow complicated procedures.
+
+Schedule:
+
+
+
+Plan.7 Readability. 
+We will use short sentences and short paragraphs, accompanied by clear headings. Each chart includes a title, unit, sample size, and a filtered summary with Quarto cross-references. The terminology remains consistent; numbers use a thousands separator and have appropriate precision. Additionally, the date format is YYYY-MM. The user interface uses simple English labels and color choices suitable for color vision deficiencies, such as changes in shape or line type. The repository will include data_raw, data, app, and vignette. Before submission, we will run and perform spelling checks.
