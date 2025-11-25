@@ -68,7 +68,7 @@ dc_energy <- nyc_raw |>
     Metered_Energy     = `Metered Areas (Energy)`,
     Metered_Water      = `Metered Areas (Water)`
   ) |>
-  ## 把这些变量转成 factor
+  ## change variables into factor
   mutate(
     Ward           = as.factor(Ward),
     Report_Year    = as.factor(Report_Year),
@@ -77,7 +77,7 @@ dc_energy <- nyc_raw |>
     Metered_Energy = as.factor(Metered_Energy),
     Metered_Water  = as.factor(Metered_Water)
   ) |>
-  ## 创建 Era
+  ## create Era
   mutate(
     Era = case_when(
       Built < 1900 ~ "Pre-1900",
@@ -143,7 +143,7 @@ ui <- fluidPage(
             inputId = "sv_var",
             label = "Single variable:",
             data = dc_energy,
-            selected = "Site_EUI"  # 默认用 Site EUI
+            selected = "Site_EUI"  
           ),
           checkboxInput(
             inputId = "sv_log",
@@ -166,7 +166,7 @@ ui <- fluidPage(
             inputId = "sv_mu",
             label = "Null hypothesis mean (mu)",
             min   = 0,
-            max   = 1000,  # 可以按需要改，比如 Site EUI 上限
+            max   = 1000, 
             value = 0
           ),
           checkboxGroupInput(
@@ -270,7 +270,7 @@ server <- function(input, output, session) {
       dplyr::filter(Report_Year %in% input$sv_years) |>
       dplyr::filter(!is.na(!!var_sym))
     
-    # 如果是 numeric，顺便去掉 0（通常是无效值）
+    # if there is numeric，remove 0(na)
     if (is.numeric(dc_energy[[var_name]])) {
       sv_data <- sv_data |> dplyr::filter(!!var_sym != 0)
     }
@@ -278,7 +278,7 @@ server <- function(input, output, session) {
     is_cat <- is.factor(dc_energy[[var_name]]) ||
       is.character(dc_energy[[var_name]])
     
-    # log 检查
+    # log check
     if (isTRUE(input$sv_log) && !is.numeric(dc_energy[[var_name]])) {
       plot.new()
       title("Log transform only works for numeric variables.")
@@ -377,7 +377,7 @@ server <- function(input, output, session) {
       return(invisible(NULL))
     }
     
-    # log 检查 X
+    # log check X
     if (isTRUE(input$mv_log_x)) {
       if (!x_num) {
         plot.new()
@@ -391,7 +391,7 @@ server <- function(input, output, session) {
       }
     }
     
-    # log 检查 Y
+    # log check Y
     if (isTRUE(input$mv_log_y)) {
       if (!y_num) {
         plot.new()
