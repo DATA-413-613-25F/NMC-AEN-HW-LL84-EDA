@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.56">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Nabiha M Chowdhury; Anna E Nagurney; Honglin Wang">
+<meta name="dcterms.date" content="2025-10-27">
+
+<title>Project Plan — NYC LL84 EDA</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="plan_files/libs/clipboard/clipboard.min.js"></script>
+<script src="plan_files/libs/quarto-html/quarto.js"></script>
+<script src="plan_files/libs/quarto-html/popper.min.js"></script>
+<script src="plan_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="plan_files/libs/quarto-html/anchor.min.js"></script>
+<link href="plan_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="plan_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="plan_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="plan_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="plan_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+  
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Project Plan — NYC LL84 EDA</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Nabiha M Chowdhury; Anna E Nagurney; Honglin Wang </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 27, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Plan.1 Admin Project Title: NYC LL84 Building Energy &amp; Water — Interactive EDA App (2022–Present)</p>
+<p>Group Members: Nabiha M Chowdhury Anna E Nagurney Honglin Wang</p>
+<p>Plan.2 Topic and Data Backgound: We believe that the LL84 regulations in New York require buildings of a certain size or larger to report their energy consumption and water usage data to the EPA’s Portfolio Manager and make the data publicly available. This way, everyone can compare similar buildings and the government and property owners can more easily identify “which types of buildings consume more energy and what measures should be taken to save energy”. What our app aims to do is to enable users to see in three steps: where I am (distribution/quantile), where I fall short (comparison/relation), and who should be the first to make changes (top/bottom list).</p>
+<p>Data Source: https://data.cityofnewyork.us/Environment/NYC-Building-Energy-and-Water-Data-Disclosure-for-/5zyy-y8am/about_data Dataset: Publicly disclosed building energy and water usage data for New York City (in accordance with Local Law 84) (from 2022 to present), New York City Open Data. API/Export: On the dataset page under the “Export/API” tab, you can obtain the SODA endpoint and query methods (here we are exporting in CSV format). Compliance Statement: The data is disclosed by the New York City Department of Buildings in accordance with LL84 regulations, and its source is official and can be verified repeatedly. Time Coverage: 2022 – present. Scale: Approximately 60,000+ rows × 200+ columns, with sufficient variables. As of: October 27, 2025.</p>
+<p>Reference: “The NYC Benchmarking Law, Local Law 84 of 2009 as amended by Local Law 133 of 2016, requires owners of buildings that meet the criteria outlined in the law to annually measure their energy and water consumption through a process called benchmarking.” “Local Law 84 of 2009 (LL84) requires annual energy and water benchmarking data to be submitted by owners of buildings with more than 50,000 square feet. This data is collected via the Environmental Protection Agency’s (EPA) Portfolio Manager website.”</p>
+<p>Based on the above text, we believe that LL84 requires large-scale buildings in New York to report their energy consumption and water usage annually in a standardized manner. This should be done using the official EPA Portfolio Manager tool and then made public. This provides us with a comparable and reusable source of primary data. Therefore, in the app, we will set the reporting year/building type/administrative area as default filters, and consider EUI (energy use intensity per unit area) as the main indicator to help users quickly understand “where I am, where I fall short, and who to address first”.</p>
+<p>“The NYC OpenData portal supports a generic API that permits access to all published data sets in a similar manner. The API is based upon the Socrata Open Data API (SODA).” We found that NYC Open Data comes with a standardized SODA interface. Any dataset can be obtained from the “Export → API” section, and the API Endpoint and fields can be retrieved. Thus, the script can accurately extract the data.</p>
+<p>Plan.3 Use Case Use Case &amp; Actor Description: For us, this App is designed for urban energy analysts and property facility managers. They can view the data but do not want to write code. A typical scenario is: someone wants to know “How much does this building/this type of building cost in New York? How much does it differ from similar buildings? Has it improved this year?” So we have designed the interface in a process where you first select the conditions and then view the results. There are fewer parameters and less jargon. It provides step-by-step energy-saving suggestions and lists that are understandable and actionable.</p>
+<p>Actor Questions of Interest: What are the median EUI values for various types of buildings (Property Type) and each borough in the selected year? Which types/areas have EUI values significantly higher than the 75th percentile of the city’s similar values? (By calculating the median and quartiles separately, box plots/distribution graphs can quickly show which types/areas are “above the upper quartile”.)</p>
+<p>Under the current filtering conditions (year, type, district, area range), sort by unit area electricity consumption (kWh/ft²) or unit area water consumption (kgal/ft²) from highest to lowest. Which specific buildings are included in the top 10% or top N? (Calculate the unitized indicators → Sort → Mark the threshold → Export CSV list.)</p>
+<p>Is there a clear monotonic trend between EUI, floor area (ft²) and building age? If viewed by property type, does the trend still exist or become more pronounced? (Scatter plot + linear smoothing; Spearman correlation; Comparison by type.)</p>
+<p>Has the median/frequency of EUI for the same type of buildings (the same Property Type) decreased in 2025 compared to 2024? Which types or Boroughs have achieved greater energy savings overall this year? (Select two years → Group by the same category → Compare the median/frequency → Use a bar chart to show the changes and mark the decrease/stability/increase.)</p>
+<p>Anticipate Workflow of the Actor: We consider that it would be best for users to follow a convenient process: first, select the year at the top of the page, say 2025, then check the filtering conditions: the common ones are Property Type, Borough, Area Range, and Building Age. At the same time, turn on the data quality switches such as “Only &gt;0” and “Outliers (1% above and below)” as needed. Then, look at the overview area of the distribution/bubble chart first. We will present the EUI for each type or each area as the median + quantile, allowing users to immediately see “who is high and who is low, who is an outlier”. After looking at the overview, move to the relationship area and use scatter plots + smooth lines to view the relationship between EUI and area/building age. If you are worried that it will be too chaotic when mixed together, click “By Type Layering”. Within the same category, it will be clearer to observe the trend. When you feel that the range selection is about right, click “Generate Top List”: The system will automatically sort by unit area electricity consumption (kWh/ft²) or unit area water consumption (kgal/ft²), and provide the top 10%/Top N list of buildings. Finally, we will automatically generate a one-sentence summary for you, telling you: In this filter, which category/which area is higher, has there been any improvement compared to last year, and which buildings should be prioritized.</p>
+<p>Plan.4 Ethical Review We have selected the LL84 data published by NYC Open Data, which is sourced from the official and can be replicated. In the README, we will indicate the source and as-of date, and provide API examples and steps for reproducing the experiment. The data is stored in the repository under the folders ‘data_raw’ and ‘data’, avoiding uploading unnecessary large raw files. When necessary, Git LFS is used. During the cleaning stage, we do not directly treat 0 values as good results. Instead, we provide interactive switches such as ’only look at &gt;0 or ’remove extreme values (within 1%), and explain the handling methods for missing or extreme values in the figure notes. In the analysis and visualization stage, we only perform descriptive EDA, unify axis units and proportions, display sample size and filtering conditions, and avoid interpreting correlations as causation. During the publishing and sharing stage, the default display is aggregated/grouped views, and no value judgment is made on individual properties. If users export the Top list, the interface and exported files will also add usage and risk warnings.</p>
+<p>Plan.5 App Concept General Layout: We have decided to adopt a layout of a left-side filter bar and a right-side result area for the software, and provide three tabs: Home (data source, units), EDA (core analysis), and About (references, license, version information). Within EDA, there are two sub-areas: Overview (distribution or box plot and a one-sentence summary) and Compare.</p>
+<p>Data Selection &amp; manipulation: On the left side, the following are provided: Year (we have set it to 2025), Property Type (multiple selections), Borough (multiple selections), Floor Area bins, Building Age range. The quality options include “Only &gt; 0” and “extremes (±1%)”. Changes in filtering will only refresh the affected charts.</p>
+<p>Numerical/Graphical analysis: Distribution/Comparison: EUI histogram/density + box plot/violin plot (by Type/Borough), where we will include a legend indicating the units and sample size. Relationships: The scatter plot shows EUI vs.&nbsp;area/building age, supports the option to categorize by Type, and the related heatmap displays the correlations between EUI, unit electricity/water consumption, area, and building age. Watchlist: Generate a Top/Bottom list sorted by unit area electricity consumption (kWh/ft²) / water consumption (kgal/ft²).</p>
+<p>Statistical models and tests: Our group members are all 413, excluding interactive modeling. We will compare the median/interquartile changes in EUI between 2025 and 2024 (using bar/pie charts), and provide the differences and directions.</p>
+<p>Plan.6 Collaboration Group Members: Nabiha M Chowdhury Anna E Nagurney Honglin Wang</p>
+<p>Part one(Nabiha): Download the 2025 data from NYC Open Data to the repository (keep a sample CSV). Clean the data and retain only the necessary columns (year, type, district, area, construction year, EUI, electricity/water, etc.). only consider values greater than 0, remove extreme values.</p>
+<p>Part Two(Honglin): Create a page with filtering on the left and results on the right (select year / type / district / area / building age). Box plot / distribution chart: See which category / which district has a higher EUI; Scatter plot + smoothing: See the relationship between EUI and area, building age; Top list table: Rank by unit area electricity consumption / water consumption. Add a simple comparison chart (bar chart) between this year and last year.</p>
+<p>Part Three(Anna): Create a README (data source and date, how to run, field descriptions). Place the following in Plan/Progress/Vignette: use cases, several diagrams, a brief summary. Write an ethical paragraph (to public data, only descriptive analysis). prepare for the power point(or all of us).</p>
+<p>Collaboration and Branching: We have an iMessage group where we sync our daily work in real time. Every weekend, we’ll have a 10-minute summary session. On the branch, each person has a long-term section. After writing a short paragraph, we’ll merge it once. The main branch only receives stable results. Before merging, we’ll run a self-test ourselves and then post it in the group. We don’t follow complicated procedures.</p>
+<p>Schedule: Part one for 1 week Part two for 2 weeks Part three for 2 weeks Power point for 1 week</p>
+<p>Plan.7 Readability. We will use short sentences and short paragraphs, accompanied by clear headings. Each chart includes a title, unit, sample size, and a filtered summary with Quarto cross-references. The terminology remains consistent; numbers use a thousands separator and have appropriate precision. Additionally, the date format is YYYY-MM. The user interface uses simple English labels and color choices suitable for color vision deficiencies, such as changes in shape or line type. The repository will include data_raw, data, app, and vignette. Before submission, we will run and perform spelling checks.</p>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
