@@ -1,0 +1,165 @@
+---
+title: "Project Progress Report — NYC LL84 EDA"
+author: "Nabiha M Chowdhury; Anna E Nagurney; Honglin Wang"
+date: today
+format:
+  html:
+    embed-resources: true
+toc: true
+number-sections: true
+---
+---
+
+# Admin
+## Project Title: 
+NYC LL84 Building Energy & Water — Interactive EDA App (2022–Present)
+
+## Group Members:
+Nabiha M Chowdhury
+Anna E Nagurney
+Honglin Wang
+
+---
+
+# Topic and Data
+
+## Updated Context and Use Case
+Our project focuses on publicly disclosed building energy and water performance data required under **New York City's Local Law 84 (LL84)**. Buildings above a certain size must report their annual electricity, fuel, and water usage to the EPA Portfolio Manager system, and the data becomes publicly available through NYC Open Data.
+
+Our Shiny app is designed for users such as urban energy analysts, property managers, and students who want to explore energy efficiency trends without writing code. The workflow we designed aims to answer key questions like:
+
+- Where does a specific building or building type fall within city-wide performance distributions?  
+- Which buildings or property types show unusually high energy or water usage?  
+- How do energy and water metrics relate to building characteristics such as floor area or age?
+
+The final app guides users through a clear exploration process:  
+(1) Understand distributions → (2) Compare relationships → (3) Identify specific buildings or patterns.
+
+## Data Source and Current Data Status
+We are using the dataset:
+
+**NYC Building Energy and Water Data Disclosure for Local Law 84 (2022–Present)**  
+Source: NYC Open Data  
+Rows: ~60,000  
+Columns: 200+  
+As of: October 27, 2025
+
+### Major updates since the original plan:
+- We exported the dataset in CSV format using the NYC Open Data “Export/API” interface.
+- The file was successfully imported using `read_csv()`.
+- We renamed long variable names (e.g., *ENERGY STAR Score*, *Property GFA*) for easier selection in the UI.
+- Key categorical variables were converted to factors.
+- We created a custom “Era” variable to group buildings by construction period.
+- The dataset is now stored in a cleaned tibble called **`dc_energy`** which the app uses throughout the UI/server logic.
+
+Data collection, cleaning, and wrangling are **completed** for the purposes of the app.
+
+---
+
+# Ethical Review
+
+Since LL84 data is publicly mandated, non-confidential, and published by NYC agencies, the privacy risk is minimal. The dataset contains building-level information (e.g., address, square footage) but no sensitive personal data.
+
+Key ethical considerations:
+- The app is for educational and exploratory use only and should not be interpreted as official compliance or policy analysis.
+- Users should avoid overinterpreting trends as causal.
+
+No major ethical concerns remain at this stage.
+
+---
+
+# App Design
+
+## Overall Structure
+The current Shiny app includes the following finalized tabs:
+
+1. **Introduction** – Overview of the dataset, purpose of the app, and LL84 context.  
+2. **Univariate Analysis** – Explore distributions of a single variable by year.  
+3. **Bivariate Analysis** – Compare relationships between two variables and fit simple models.  
+4. **Data Table** – View and filter the full dataset interactively.
+
+This tab structure matches our original plan but is now more polished and functional.
+
+## User Selection and Filtering Options
+### Univariate Analysis
+Final user options include:
+- Select any single variable from the dataset  
+- Optional log transformation  
+- Option to flip coordinates for factor variables  
+- Adjustable number of histogram bins  
+- Input a value for a one-sample t-test  
+- Multiple year selection
+
+### Bivariate Analysis
+Final user options include:
+- Select X and Y variables  
+- Optional log transformations for each  
+- Automatically plotted scatterplot with smoothing  
+- Interpretation of linear model results  
+
+### Data Table
+- Full dataset viewer with filters  
+- Ability to inspect rows, sort, and search  
+
+These options give users meaningful flexibility while avoiding overwhelming complexity.
+
+## Exploratory and Statistical Features
+**Exploratory Analysis:**
+- Histograms, boxplots, density plots  
+- Scatterplots with trend lines  
+- Year-to-year comparisons  
+- Group-based breakdowns  
+
+**Statistical Analysis:**
+- One-sample t-tests (rendered as a table)  
+- Simple linear regressions in the Bivariate tab  
+
+All major features originally proposed are now implemented.
+
+---
+
+# Demonstration Outline and Responsibilities
+
+During the final demonstration, we plan the following structure:
+
+1. **Introduction & Data Background** —   
+2. **Univariate Tab Walkthrough** —
+3. **Bivariate Tab + Modeling** —  
+4. **Data Table Use Case** — 
+
+---
+
+# Risk Assessment and Mitigation
+
+## Current Risks
+1. **Large dataset may slow rendering**  
+   - Mitigation: Use reactive expressions, simplify default views, and predefine commonly used variables.
+
+2. **Group member availability**  
+   - Mitigation: Tasks distributed earlier; the app and major logic were completed before deadlines.
+
+3. **Scope accuracy from too many variables**  
+   - Mitigation: Limit variable selection to meaningful building metrics.
+
+At this point, no major risks threaten timely completion.
+
+---
+
+# Collaboration and Timeline Updates
+
+### Completed Milestones
+- Data downloaded and cleaned 
+- App UI drafted 
+- Server logic written
+- Analysis features implemented
+- App currently runs end-to-end  
+
+### Remaining Milestones
+- Write and finalize the vignette  
+- Practice the final demonstration  
+- Conduct a final code cleanup and UI polish  
+- Submit the final Shiny app + report  
+
+We are on track to finish before the due date.
+
+---
