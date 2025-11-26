@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # NMC-AEN-HW-NYC LL84 Building Energy Explorer
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)  
 *A Shiny app for exploring New York City Local Law 84 energy benchmarking data*
@@ -22,7 +23,7 @@ The app enables interpretation of publicly disclosed LL84 data **without coding*
 | Name        | Class | GitHub ID        |
 |-------------|-------|-----------------|
 | Anna N.     | 613   | `anna-nagurney` |
-| Member 2    | 613   | `github-id-2`   |
+| Honglin W    | 613   | `229153013`   |
 | Member 3    | 613   | `github-id-3`   |
 
 > Replace placeholders with actual names/IDs.
@@ -85,3 +86,7 @@ shiny::runApp("app.R")
 Citation
 
 NYC LL84 Building Energy Explorer (2025). Developed for UConn BADM 413/613.
+=======
+# NMC-AEN-HW-LL84-EDA
+Interactive EDA app for NYC LL84 Building Energy &amp; Water (2022–Present).
+>>>>>>> 03b9ff3 (Add project files and ignore large LL84 data)
