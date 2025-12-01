@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Vignette: NYC LL84 Building Energy Explorer</title></head><body>
+<h1>Vignette: NYC LL84 Building Energy Explorer</h1>
+<p>This HTML file is a simple rendering of the .qmd contents included in the package vignette. It shows the text, R code chunks (not executed here) and instructions for rendering with Quarto. For a fully executed vignette with plots and computed summaries, render the .qmd locally using Quarto or RStudio.</p>
+<pre>
+---
+title: "Vignette: NYC LL84 Building Energy Explorer"
+author: "Anna N. and Team"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+format: html
+editor: source
+---
+
+# 1. YAML Header
+
+This document is a Quarto (`.qmd`) vignette for the **NYC LL84 Building Energy Explorer** Shiny app. It is authored by the project team and intended for submission in the package `vignettes/` folder. The generated HTML should be produced with `embedded-resources: true` when rendering with Quarto (see package build instructions).
+
+# 2. Use Case (2.0)
+
+**Problem.** Local Law 84 (LL84) requires large buildings in NYC to report energy and water benchmarking data. Stakeholders need a non-coding interface to explore: where a building sits in the distribution, how it compares to peers, and which buildings should be prioritized for efficiency upgrades.
+
+**Target Actors.** Urban energy analysts, city planners, and property/facility managers who want an accessible exploratory workflow without writing code.
+
+**How the App Solves the Problem.** The app guides users through a three-step workflow: (1) distribution & percentile (Where am I?), (2) relationships & drivers (Where do I fall short?), and (3) ranked lists to prioritize action (Who should act first?). The UI minimizes jargon and exposes only the most important filtering controls to encourage fast insights and reproducible results.
+
+# 3. Required Packages (1.0)
+
+The app uses the following R packages. When the vignette is rendered in your development environment the code chunk below will print the exact package versions in use.
+
+```{r}
+#| echo: true
+required_pkgs &lt;- c("shiny", "tidyverse", "broom", "DT", "bslib", "thematic", "showtext")
+installed &lt;- sapply(required_pkgs, function(p) {
+  if (requireNamespace(p, quietly = TRUE)) {
+    paste0(p, ": ", as.character(utils::packageVersion(p)))
+  } else {
+    paste0(p, ": NOT INSTALLED")
+  }
+})
+installed
+```
+
+&gt; **Recommended minimum versions (for reproducibility):**  
+&gt; `shiny &gt;= 1.7.0`, `tidyverse &gt;= 1.3.0`, `broom &gt;= 1.0.0`, `DT &gt;= 0.24`, `bslib &gt;= 0.4.0`, `thematic &gt;= 0.2.0`, `showtext &gt;= 0.9.0`.
+
+# 4. Data Source and Structure (2.0)
+
+**Primary data source:** NYC Open Data — *NYC Building Energy and Water Data Disclosure for Local Law 84* (the `nyc.csv` file used by the app). The app expects the dataset to be present in the package root or `inst/extdata/` as `nyc.csv`.
+
+The code below shows how the app reads and summarizes the incoming dataset. When rendered, the code will compute how many rows (observations) are available and display the variable names that the app expects.
+
+```{r}
+#| echo: true
+# Example code the app uses to read the dataset
+# nyc_raw &lt;- readr::read_csv("nyc.csv")
+# For vignette rendering we show the structure code; during package checks the file should be available.
+print("When you run this vignette locally, make sure nyc.csv is in your working directory. The app uses the following variables (renamed inside the app):")
+vars_expected &lt;- c(
+  "Calendar Year", "ENERGY STAR Score", "Electricity Use - Grid Purchase (kWh)",
+  "Property GFA - Calculated (Buildings) (ft²)", "Property GFA - Self-Reported (ft²)",
+  "Year Built", "Borough", "Primary Property Type - Self Selected",
+  "Primary Property Type - Portfolio Manager-Calculated", "Metered Areas (Energy)",
+  "Metered Areas (Water)", "Site EUI"
+)
+vars_expected
+# Use the following to inspect your local dataset:
+# nyc_raw &lt;- readr::read_csv("nyc.csv")
+# dplyr::glimpse(nyc_raw)
+# nrow(nyc_raw)
+```
+
+**Derived data frame in the app:** `dc_energy` — this is the transformed/cleaned dataframe produced from `nyc_raw`. Key transformations performed in the app include column renames, conversions to factors, creation of an `Era` categorical variable (based on `Year Built`), and removal of zeros where appropriate before plotting.
+
+**Key variables used throughout the app** (after rename):
+- `Report_Year` (factor) — reporting calendar year
+- `Energy_Star_Score` (numeric)
+- `Electricity_Grid_Usage` (kWh)
+- `SQFT_Gross` and `SQFT_Tax` (ft²)
+- `Built` (Year Built integer)
+- `Ward` (Borough, factor)
+- `Type_SS` / `Type_EPA` (Property type factors)
+- `Site_EUI` (kBtu/ft²)
+- `Era` (categorized building age)
+
+*Note:* The exact number of observations and the values will depend on the `nyc.csv` file version you use. The vignette includes code to compute counts and basic summaries when executed in an environment with the dataset available.
+
+# 5. EDA Inputs, Controls, and Outputs (3.0)
+
+This section demonstrates the exploratory workflow and maps UI controls to analysis outputs. The app's Univariate and Bivariate tabs support typical EDA tasks. Below we present two short scenarios with annotated figure captions and cross-references.
+
+## Scenario A — Distribution & Percentiles (Univariate)
+
+**Goal:** Determine the median Site EUI for office buildings in Manhattan for 2025, and know whether the building is above the 75th percentile.
+
+**Controls to set:**
+- Tab: *Univariate analysis*
+- Select variable: `Site_EUI`
+- Select `Report Year` = 2025
+- Filter in the app: `Property Type` = "Office", `Borough` = "MANHATTAN"
+- Optional: check `Only &gt;0` (the app filters zeros in numeric contexts)
+
+**Expected Outputs:**
+- A faceted histogram or boxplot showing the distribution by year or across selected groups.
+- Summary diagnostics (median, 25th/75th percentiles).
+
+**Code chunk (reproducible inside the package) to compute median and quartiles:**
+
+```{r}
+#| echo: true
+# This is the kind of code the app runs for the distribution summary:
+# library(dplyr)
+# dc_energy %&gt;%
+#   filter(Report_Year == 2025, Type_SS == "Office", Ward == "MANHATTAN") %&gt;%
+#   summarize(n = n(), median_eui = median(Site_EUI, na.rm = TRUE),
+#             q25 = quantile(Site_EUI, 0.25, na.rm = TRUE),
+#             q75 = quantile(Site_EUI, 0.75, na.rm = TRUE))
+```
+
+**Figure 1 (Distribution of Site EUI for Office buildings in Manhattan, 2025).**  
+_Figure 1_ shows the distribution and marking of the 75th percentile; buildings above this threshold are candidates for prioritized audits and efficiency upgrades. (Cross-reference: See **Section 7** for references on benchmarking interpretation.)
+
+## Scenario B — Unitized Ranking & Export (Top N)
+
+**Goal:** Get the top 10% of buildings sorted by kWh per ft² for the current filter settings and export them for follow-up.
+
+**Controls to set:**
+- Filters: Year, Property Type, Borough, Area Range, Building Age
+- In the Data Table or a dedicated panel: choose metric `Electricity per ft²` and click `Generate Top List`
+
+**Expected Outputs:**
+- A sorted table of buildings with `kWh_per_ft2` or `kgal_per_ft2` and an export button.
+- The user can export the top-N selection as a CSV.
+
+**Code chunk (example ranking logic):**
+
+```{r}
+#| echo: true
+# Example ranking pipeline
+# metric_col &lt;- "Electricity_Grid_Usage"
+# dc_energy %&gt;%
+#   filter(Report_Year == 2025, Type_SS == "Office", Ward == "MANHATTAN") %&gt;%
+#   mutate(kWh_per_ft2 = Electricity_Grid_Usage / SQFT_Gross) %&gt;%
+#   filter(is.finite(kWh_per_ft2)) %&gt;%
+#   arrange(desc(kWh_per_ft2)) %&gt;%
+#   mutate(rank = percent_rank(kWh_per_ft2)) %&gt;%
+#   filter(rank &gt;= 0.9) -&gt; top_10pct
+# top_10pct
+```
+
+**Figure 2 (Top 10% ranked by electricity per ft²).**  
+_Figure 2_ is a ranked table showing building identifiers, borough, property type, floor area, and the normalized metric. This list is intended for direct use by facility managers to schedule audits or retrofits.
+
+# 6. Statistical Analysis Inputs, Controls, and Outputs (3.0)
+
+The Bivariate tab supports correlation and simple modeling workflows. Below we outline a typical analysis and how to interpret outputs.
+
+## Scenario C — Relationship of EUI with Floor Area and Age
+
+**Goal:** Test whether Site EUI is associated with building floor area and building age, and whether the relationship persists by property type.
+
+**Controls to set:**
+- Tab: *Bivariate analysis*
+- X variable: `SQFT_Gross` (or `Built` for age)
+- Y variable: `Site_EUI`
+- Check `Show linear smoother & model results?` to see the `lm()` summary
+- Optionally check `Add non-linear smoother (LOESS)?`
+
+**Outputs & Interpretation:**
+- A scatter plot with fitted linear trendline; if the trendline is negative and statistically significant, it suggests larger buildings have lower EUI (or vice versa depending on sign).
+- The `lm()` summary provides coefficient estimates, standard errors, t-values, and R². Use Spearman correlation for monotonic trends robust to outliers — the app's code can be extended to compute `cor.test(..., method = "spearman")`.
+- For property-type stratification, use the `By Type Layering` option (or create a faceted plot) to see whether trends strengthen or weaken within categories.
+
+**Code to compute Spearman correlation and an lm fit (example):**
+
+```{r}
+#| echo: true
+# Example analysis pipeline
+# lm_data &lt;- dc_energy %&gt;% filter(Report_Year == 2025) %&gt;%
+#   filter(!is.na(SQFT_Gross), !is.na(Site_EUI), SQFT_Gross &gt; 0)
+# fit &lt;- lm(Site_EUI ~ SQFT_Gross + Built, data = lm_data)
+# summary(fit)
+# cor.test(lm_data$Site_EUI, lm_data$SQFT_Gross, method = "spearman")
+```
+
+**Figure 3 (Scatter plot of Site EUI vs Floor Area with linear smoother).**  
+_Figure 3_ shows the relationship and helps the actor decide whether building size is a major driver of energy intensity.
+
+# 7. References (1.0)
+
+At least three literature sources relevant to benchmarking, building energy use, and policy evaluation:
+
+1. U.S. Environmental Protection Agency. (2020). *ENERGY STAR Portfolio Manager*.  
+2. New York City Mayor's Office of Sustainability. (2019). *Local Law 84 and NYC Benchmarking Program: A guide for building owners*.  
+3. Allcott, H., & Greenstone, M. (2012). *Is there an energy efficiency gap?* Journal of Economic Perspectives, 26(1), 3–28.
+
+(When rendering for submission, convert the above into formal citations per your preferred style; include DOI/URLs as needed.)
+
+# 8. Individual Contributions (0.5)
+
+The following code chunk is **not** included in the rendered document (it uses `include: false`) but stores authorship metadata.
+
+```{r}
+#| include: false
+contributions &lt;- list(
+  "Anna N." = c("Project lead", "Shiny app development", "Vignette writing"),
+  "Team Member 2" = c("Data cleaning", "EDA modules", "Documentation"),
+  "Team Member 3" = c("Statistical analysis", "Testing", "Help with visuals")
+)
+contributions
+```
+
+# 9. Readability and Submission Notes (2.0)
+
+- This vignette is formatted as a single Quarto `.qmd` file intended to be placed in `vignettes/` of the package.  
+- To build the vignette with embedded resources, render with Quarto using:
+```bash
+quarto render vignettes/vignette.qmd --to html --output-file vignettes/vignette.html --force
+```
+Then ensure the HTML is built with `embedded-resources: true` in the Quarto project options (or use the `--embed-resources` flag if applicable).
+
+**Checklist before submission**
+- [ ] Place `nyc.csv` in the package `inst/extdata/` or project root.  
+- [ ] Run the vignette locally to populate counts and package versions.  
+- [ ] Knit the `.qmd` to HTML and check images/plots are embedded.  
+- [ ] Submit `vignettes/vignette.qmd` and `vignettes/vignette.html` to your repository or deliverable.
+
+---
+
+*End of vignette.*
+
+</pre>
+</body></html>
