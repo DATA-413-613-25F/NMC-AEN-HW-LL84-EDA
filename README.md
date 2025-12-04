@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # NMC-AEN-HW-NYC LL84 Building Energy Explorer
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)  
 *A Shiny app for exploring New York City Local Law 84 energy benchmarking data*
@@ -24,7 +24,7 @@ The app enables interpretation of publicly disclosed LL84 data **without coding*
 |-------------|-------|-----------------|
 | Anna N.     | 613   | `anna-nagurney` |
 | Honglin W    | 613   | `229153013`   |
-| Member 3    | 613   | `github-id-3`   |
+| Nabihi    | 613   | `github-id-3`   |
 
 > Replace placeholders with actual names/IDs.
 
