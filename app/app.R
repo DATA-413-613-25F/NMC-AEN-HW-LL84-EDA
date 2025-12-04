@@ -50,17 +50,26 @@ intro_content <- tags$div(
 )
 
 ## 1.2 Read in Data
-nyc_raw <- read_csv("Desktop/NYC_Building_Energy_and_Water_Data_Disclosure_for_Local_Law_84_(2022-Present)_20251027.csv")
+nyc_raw <- readRDS("~/Documents/DATA413_HW/NMC-AEN-HW-LL84-EDA/data/nyc_ll84_2022_present.rds")
 nyc_raw
 
 ## 1.3 Transform & create key variables ----
 dc_energy <- nyc_raw |>
   dplyr::rename(
+    # time
     Report_Year        = `Calendar Year`,
     Energy_Star_Score  = `ENERGY STAR Score`,
-    Electricity_Grid_Usage = `Electricity Use - Grid Purchase (kWh)`,
+    
+    # keypoint of NYC ：EUI / 用electricity / water usage
+    Site_EUI           = `Site EUI (kBtu/ft²)`,
+    Elec_Use_kWh       = `Electricity Use - Grid Purchase (kWh)`,
+    Water_Use_kgal     = `Water Use (All Water Sources) (kgal)`,
+    
+    # building area
     SQFT_Gross         = `Property GFA - Calculated (Buildings) (ft²)`,
     SQFT_Tax           = `Property GFA - Self-Reported (ft²)`,
+    
+    # building factors
     Built              = `Year Built`,
     Ward               = Borough,
     Type_SS            = `Primary Property Type - Self Selected`,
@@ -68,8 +77,30 @@ dc_energy <- nyc_raw |>
     Metered_Energy     = `Metered Areas (Energy)`,
     Metered_Water      = `Metered Areas (Water)`
   ) |>
-  ## change variables into factor
-  mutate(
+  
+  ## 1.3.0 Make sure that the key columns are numeric.
+  dplyr::mutate(
+    Elec_Use_kWh   = as.numeric(Elec_Use_kWh),
+    Water_Use_kgal = as.numeric(Water_Use_kgal),
+    SQFT_Gross     = as.numeric(SQFT_Gross)
+  ) |>
+  
+  ## 1.3.1 Establish the intensity indicator per unit area
+  dplyr::mutate(
+    Elec_kWh_per_ft2   = dplyr::if_else(
+      SQFT_Gross > 0 & !is.na(SQFT_Gross),
+      Elec_Use_kWh / SQFT_Gross,
+      NA_real_
+    ),
+    Water_kgal_per_ft2 = dplyr::if_else(
+      SQFT_Gross > 0 & !is.na(SQFT_Gross),
+      Water_Use_kgal / SQFT_Gross,
+      NA_real_
+    )
+  ) |>
+  
+  ## 1.3.2 Convert several categorical variables into factors
+  dplyr::mutate(
     Ward           = as.factor(Ward),
     Report_Year    = as.factor(Report_Year),
     Type_SS        = as.factor(Type_SS),
@@ -77,9 +108,10 @@ dc_energy <- nyc_raw |>
     Metered_Energy = as.factor(Metered_Energy),
     Metered_Water  = as.factor(Metered_Water)
   ) |>
-  ## create Era
-  mutate(
-    Era = case_when(
+  
+  ## 1.3.3 create Era
+  dplyr::mutate(
+    Era = dplyr::case_when(
       Built < 1900 ~ "Pre-1900",
       Built < 1951 ~ "Early-Mid 20th",
       Built < 2000 ~ "Late 20th",
@@ -117,6 +149,28 @@ theme_large_axes <- theme(
   axis.text  = element_text(size = rel(1.2))
 )
 
+## 1.6 Subset of key variables for UI ----
+dc_energy_ui_vars <- dc_energy |>
+  dplyr::select(
+    # Categorical variables for filtering
+    Report_Year,
+    Ward,
+    Type_SS,
+    Type_EPA,
+    Era,
+    Site_EUI,
+    Elec_Use_kWh,
+    Water_Use_kgal,
+    Elec_kWh_per_ft2,
+    Water_kgal_per_ft2,
+    
+    # building area
+    SQFT_Gross,
+    SQFT_Tax,
+    Built
+  )
+
+
 ## ===============================
 ## 2. User Interface -------------
 ## ===============================
@@ -142,7 +196,7 @@ ui <- fluidPage(
           varSelectInput(
             inputId = "sv_var",
             label = "Single variable:",
-            data = dc_energy,
+            data = dc_energy_ui_vars,
             selected = "Site_EUI"  
           ),
           checkboxInput(
@@ -191,7 +245,7 @@ ui <- fluidPage(
           varSelectInput(
             inputId = "mv_x",
             label = "X variable:",
-            data = dc_energy,
+            data = dc_energy_ui_vars,
             selected = "SQFT_Gross"
           ),
           checkboxInput(
@@ -202,7 +256,7 @@ ui <- fluidPage(
           varSelectInput(
             inputId = "mv_y",
             label = "Y variable:",
-            data = dc_energy,
+            data = dc_energy_ui_vars,
             selected = "Site_EUI"
           ),
           checkboxInput(
@@ -234,7 +288,56 @@ ui <- fluidPage(
       )
     ),
     
-    ## ---- Tab 3: Data Table ----
+    ## ---- Tab 3: Top list ----
+    tabPanel(
+      "Top list",
+      sidebarLayout(
+        sidebarPanel(
+          checkboxGroupInput(
+            inputId = "top_years",
+            label   = "Report year(s):",
+            choices = sort(unique(dc_energy$Report_Year)),
+            selected = "2022"
+          ),
+          selectInput(
+            inputId = "top_wards",
+            label   = "Borough (Ward):",
+            choices = sort(unique(dc_energy$Ward)),
+            multiple = TRUE
+          ),
+          selectInput(
+            inputId = "top_types",
+            label   = "Primary property type (self-selected):",
+            choices = sort(unique(dc_energy$Type_SS)),
+            multiple = TRUE
+          ),
+          radioButtons(
+            inputId = "top_metric",
+            label   = "Metric to rank by:",
+            choices = c(
+              "Electricity per ft² (kWh/ft²)" = "Elec_kWh_per_ft2",
+              "Water per ft² (kgal/ft²)"       = "Water_kgal_per_ft2",
+              "Site EUI (kBtu/ft²)"            = "Site_EUI"
+            ),
+            selected = "Elec_kWh_per_ft2"
+          ),
+          numericInput(
+            inputId = "top_n",
+            label   = "Top N buildings:",
+            value   = 50,
+            min     = 10,
+            max     = 500
+          )
+        ),
+        mainPanel(
+          DT::dataTableOutput("top_table"),
+          tags$br(),
+          textOutput("top_summary")
+        )
+      )
+    ),
+    
+    ## ---- Tab 4: Data Table ----
     tabPanel(
       "Data Table",
       sidebarLayout(
@@ -253,6 +356,7 @@ ui <- fluidPage(
     
   ) # end tabsetPanel
 ) # end fluidPage
+
 
 ## ===============================
 ## 3. Server Logic ---------------
@@ -540,7 +644,116 @@ server <- function(input, output, session) {
     summary(fit)
   })
   
-  ## 3.5 Data Table ----------------
+  ## 3.5 Top list reactive data ----
+  top_data <- reactive({
+    
+    metric <- input$top_metric
+    
+    data <- dc_energy |>
+      dplyr::filter(Report_Year %in% input$top_years)
+    
+    # filter Borough
+    if (!is.null(input$top_wards) && length(input$top_wards) > 0) {
+      data <- data |>
+        dplyr::filter(Ward %in% input$top_wards)
+    }
+    
+    # filter Property Type
+    if (!is.null(input$top_types) && length(input$top_types) > 0) {
+      data <- data |>
+        dplyr::filter(Type_SS %in% input$top_types)
+    }
+    
+    if (!metric %in% names(data)) {
+      return(tibble(
+        message = "Selected metric not found in data."
+      ))
+    }
+    
+    data <- data |>
+      dplyr::mutate(
+        metric_value = .data[[metric]]
+      ) |>
+      dplyr::filter(
+        !is.na(metric_value),
+        metric_value > 0,
+        is.finite(metric_value)
+      )
+    
+    if (nrow(data) == 0) {
+      return(tibble(
+        message = "No data for current selection."
+      ))
+    }
+    
+    data <- data |>
+      dplyr::arrange(dplyr::desc(metric_value)) |>
+      dplyr::mutate(
+        rank_overall = dplyr::row_number()
+      )
+    
+    n <- input$top_n
+    if (is.null(n) || is.na(n) || n <= 0) n <- 50
+    
+    data <- data |>
+      dplyr::slice_head(n = n) |>
+      dplyr::select(
+        rank_overall,
+        Report_Year,
+        Ward,
+        Type_SS,
+        Era,
+        SQFT_Gross,
+        Site_EUI,
+        Elec_kWh_per_ft2,
+        Water_kgal_per_ft2,
+        metric_value
+      )
+    
+    data
+  })
+  
+  ## 3.5b Top list table output ----
+  output$top_table <- DT::renderDataTable({
+    dt <- top_data()
+    
+    if ("message" %in% names(dt)) {
+      return(DT::datatable(dt, rownames = FALSE, options = list(pageLength = 5)))
+    }
+    
+    DT::datatable(
+      dt,
+      options = list(pageLength = 20),
+      rownames = FALSE
+    )
+  })
+  
+  ## 3.5c Top list summary text ----
+  output$top_summary <- renderText({
+    dt <- top_data()
+    
+    if ("message" %in% names(dt) || !"metric_value" %in% names(dt)) {
+      return("")
+    }
+    
+    metric_label <- switch(
+      input$top_metric,
+      Elec_kWh_per_ft2   = "electricity use per square foot (kWh/ft²)",
+      Water_kgal_per_ft2 = "water use per square foot (kgal/ft²)",
+      Site_EUI           = "site EUI (kBtu/ft²)",
+      input$top_metric
+    )
+    
+    yrs <- paste(unique(dt$Report_Year), collapse = ", ")
+    
+    paste0(
+      "Showing top ", nrow(dt), " buildings by ",
+      metric_label,
+      " for year(s): ", yrs, "."
+    )
+  })
+  
+  ## 3.6 Data Table ----------------
   output$dc_table <- DT::renderDataTable({
     
     data_to_show <- dc_energy
@@ -558,6 +771,7 @@ server <- function(input, output, session) {
   })
   
 }
+
 
 ## ===============================
 ## 4. Run the App ----------------
