@@ -6,7 +6,7 @@ library(shiny)
 library(tidyverse)
 library(broom)
 library(DT)
-
+library(here)
 library(bslib)
 library(thematic)
 library(showtext)
@@ -50,9 +50,8 @@ intro_content <- tags$div(
 )
 
 ## 1.2 Read in Data
-nyc_raw <- readRDS("~/Documents/DATA413_HW/NMC-AEN-HW-LL84-EDA/data/nyc_ll84_2022_present.rds")
+nyc_raw <- readRDS(here::here("data", "nyc_ll84_2022_present.rds"))
 nyc_raw
-
 ## 1.3 Transform & create key variables ----
 dc_energy <- nyc_raw |>
   dplyr::rename(
