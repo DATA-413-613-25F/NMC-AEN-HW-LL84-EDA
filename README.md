@@ -22,9 +22,9 @@ The app enables interpretation of publicly disclosed LL84 data **without coding*
 
 | Name        | Class | GitHub ID        |
 |-------------|-------|-----------------|
-| Anna N.     | 613   | `anna-nagurney` |
-| Honglin W    | 613   | `229153013`   |
-| Nabihi    | 613   | `github-id-3`   |
+| Anna N.     | 413   | `anna-nagurney` |
+| Honglin W    | 413   | `229153013`   |
+| Nabihi    | 413   | `github-id-3`   |
 
 > Replace placeholders with actual names/IDs.
 
