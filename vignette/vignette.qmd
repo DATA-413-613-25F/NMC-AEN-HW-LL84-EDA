@@ -197,9 +197,9 @@ The following code chunk is **not** included in the rendered document (it uses `
 ```{r}
 #| include: false
 contributions <- list(
-  "Anna N." = c("Project lead", "Shiny app development", "Vignette writing"),
-  "Team Member 2" = c("Data cleaning", "EDA modules", "Documentation"),
-  "Team Member 3" = c("Statistical analysis", "Testing", "Help with visuals")
+  "Anna N." ,
+  "Honglin W." ,
+  "Nabiha"
 )
 contributions
 ```
